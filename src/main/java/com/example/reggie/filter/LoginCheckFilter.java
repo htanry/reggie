@@ -1,6 +1,7 @@
 package com.example.reggie.filter;
 
 import com.alibaba.fastjson.JSON;
+import com.example.reggie.common.BaseContext;
 import com.example.reggie.common.Response;
 import com.example.reggie.entity.Employee;
 import lombok.extern.slf4j.Slf4j;
@@ -48,6 +49,10 @@ public class LoginCheckFilter implements Filter {
         //4.判断登录状态，如果已登录，则直接放行
         if(request.getSession().getAttribute("employee") != null){
             log.info("用户{}已登录", request.getSession().getAttribute("employee"));
+
+            //设置ThreadLocal的值
+            BaseContext.setCurrentId((Long) request.getSession().getAttribute("employee"));
+
             filterChain.doFilter(request, response);
             return;
         }

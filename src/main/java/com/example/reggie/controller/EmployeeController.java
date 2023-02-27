@@ -73,12 +73,15 @@ public class EmployeeController {
     public Response<String> save(HttpServletRequest request, @RequestBody Employee employee){
         log.info("新增员工{}", employee.getName());
         employee.setPassword(DigestUtils.md5DigestAsHex("123456".getBytes()));  //设置默认密码并加密
-        employee.setCreateTime(LocalDateTime.now());    //设置创建员工的时间
-        employee.setUpdateTime(LocalDateTime.now());
+
+        //createTime,updateTime,createUser,updateUser都属于公共字段，可以使用mybatis-plus的公共字段自动填充功能设置属性
+        //employee.setCreateTime(LocalDateTime.now());    //设置创建员工的时间
+        //employee.setUpdateTime(LocalDateTime.now());
         //获取创建者的id
-        Long employeeId = (Long) request.getSession().getAttribute("employee");
-        employee.setCreateUser(employeeId);   //设置创建者的id
-        employee.setUpdateUser(employeeId);
+        //Long employeeId = (Long) request.getSession().getAttribute("employee");
+        //employee.setCreateUser(employeeId);   //设置创建者的id
+        //employee.setUpdateUser(employeeId);
+
         employeeService.save(employee);
         return Response.success("新增员工成功");
     }
@@ -114,9 +117,12 @@ public class EmployeeController {
     @PutMapping
     public Response<String> update(HttpServletRequest request, @RequestBody Employee employee){
         log.info("修改员工{}的信息", employee.getId());
+
         //为需要修改信息的员工设置必要的属性
-        employee.setUpdateTime(LocalDateTime.now());
-        employee.setUpdateUser((Long) request.getSession().getAttribute("employee"));
+        //updateTime,updateUser都属于公共字段，可以使用mybatis-plus的公共字段自动填充功能设置属性
+        //employee.setUpdateTime(LocalDateTime.now());
+        //employee.setUpdateUser((Long) request.getSession().getAttribute("employee"));
+
         employeeService.updateById(employee);
         return Response.success("员工信息修改成功");
     }
