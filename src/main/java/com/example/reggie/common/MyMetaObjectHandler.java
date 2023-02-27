@@ -7,6 +7,9 @@ import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
 
+/**
+ * 公共字段自动填充，必须实现MetaObjectHandler接口，并实现insertFill和updateFill方法
+ */
 @Component
 @Slf4j
 public class MyMetaObjectHandler implements MetaObjectHandler {
