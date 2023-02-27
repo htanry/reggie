@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.sql.SQLIntegrityConstraintViolationException;
 
 /**
- * 全局异常处理器，底层是基于AOP实现的
+ * 全局异常处理器，底层是基于AOP实现的，代理了各个处理器方法
  */
 //被RestController和Controller注解的类会被代理
 @ControllerAdvice(annotations = {RestController.class, Controller.class})
@@ -26,5 +26,16 @@ public class GlobalExceptionHandler {
             return Response.error(e.getMessage().split(" ")[2] + "已存在");
         }
         return Response.error("未知错误");
+    }
+
+    /**
+     * 可以将异常信息反映到浏览器
+     * @param e
+     * @return
+     */
+    @ExceptionHandler(CustomException.class)
+    public Response<String> exceptionHandler(CustomException e){
+        log.error(e.getMessage());
+        return Response.error(e.getMessage());
     }
 }

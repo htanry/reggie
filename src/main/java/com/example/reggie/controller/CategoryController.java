@@ -55,7 +55,20 @@ public class CategoryController {
     @DeleteMapping
     public Response<String> delete(Long id){
         log.info("删除分类 {}", id);
-        categoryService.removeById(id);
+        //categoryService.removeById(id); //如果当前分类关联了其他菜品或套餐，就不能直接删除当前分类
+        categoryService.remove(id); //调用自定义的删除方法
         return Response.success("成功删除分类");
+    }
+
+    /**
+     * 根据id修改分类信息
+     * @param category  前端通过json形式将分类的信息传送到服务器，所以使用@RequestBody接收
+     * @return
+     */
+    @PutMapping
+    public Response<String> update(@RequestBody Category category){
+        log.info("修改分类信息 {}", category);
+        categoryService.updateById(category);
+        return Response.success("修改分类信息成功");
     }
 }
