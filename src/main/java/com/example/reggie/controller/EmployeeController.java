@@ -87,7 +87,7 @@ public class EmployeeController {
      * 员工信息的分页查询
      * @param page 客户端以URL拼接的方式传参数给服务器，所以直接直接声明形参就可以获取到对应的参数值
      * @param pageSize
-     * @param name 形参名要与URL中的key一致
+     * @param name 形参名要与URL中的key一致，不一致的话要使用@PathVariable接收
      * @return
      */
     @GetMapping("/page")    //请求路径http://localhost:8080/employee/page?page=1&pageSize=10&name=%E5%BC%A0%E4%B8%89
@@ -103,5 +103,35 @@ public class EmployeeController {
         queryWrapper.orderByDesc(Employee::getUpdateTime);  //根据employee.updateTime排序
         employeeService.page(pageInfo, queryWrapper);
         return Response.success(pageInfo);
+    }
+
+    /**
+     * 根据id修改员工信息,前后端在互传信息的时候会丢失部分数据的精度，比如Long型的id值会丢失末尾几位的精度，导致根据id查询数据库的
+     * 记录失败，解决办法是将java对象数据统一转换为json在前后端之间传送，因此需要扩展SpringMVC的消息转换器
+     * @param employee 前端以json的格式将employee传送到服务器，所以要用@RequestBody接收
+     * @return
+     */
+    @PutMapping
+    public Response<String> update(HttpServletRequest request, @RequestBody Employee employee){
+        log.info("修改员工{}的信息", employee.getId());
+        //为需要修改信息的员工设置必要的属性
+        employee.setUpdateTime(LocalDateTime.now());
+        employee.setUpdateUser((Long) request.getSession().getAttribute("employee"));
+        employeeService.updateById(employee);
+        return Response.success("员工信息修改成功");
+    }
+
+    /**
+     * 根据id查询员工
+     * @param id
+     * @return
+     */
+    @GetMapping("/{id}")
+    public Response<Employee> getById(@PathVariable Long id){
+        log.info("查询员工{}的信息", id);
+        Employee employee = employeeService.getById(id);
+        if (employee != null)
+            return Response.success(employee);
+        return Response.error("未能查询到对应员工");
     }
 }
