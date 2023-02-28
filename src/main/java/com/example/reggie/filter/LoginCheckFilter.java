@@ -38,7 +38,9 @@ public class LoginCheckFilter implements Filter {
                 "/employee/login",  //路径必须是以/开头
                 "/employee/logout",
                 "/backend/**",  //backend下的index.html可以访问，但是没有数据
-                "/front/**"  //front下的index.html可以访问，但是没有数据
+                "/front/**",  //front下的index.html可以访问，但是没有数据
+                "/user/sendMsg",    //移动端发送短信
+                "/user/login"       //移动端登录
         };
         //3.如果不需要处理，则直接放行
         if (check(urls, uri)){
@@ -46,12 +48,23 @@ public class LoginCheckFilter implements Filter {
             filterChain.doFilter(request, response);
             return;
         }
-        //4.判断登录状态，如果已登录，则直接放行
+        //4.1 判断登录状态，如果已登录，则直接放行
         if(request.getSession().getAttribute("employee") != null){
             log.info("用户{}已登录", request.getSession().getAttribute("employee"));
 
             //设置ThreadLocal的值
             BaseContext.setCurrentId((Long) request.getSession().getAttribute("employee"));
+
+            filterChain.doFilter(request, response);
+            return;
+        }
+
+        //4.2 判断移动端登录状态，如果已登录，则直接放行
+        if(request.getSession().getAttribute("user") != null){
+            log.info("用户{}已登录", request.getSession().getAttribute("user"));
+
+            //设置ThreadLocal的值
+            BaseContext.setCurrentId((Long) request.getSession().getAttribute("user"));
 
             filterChain.doFilter(request, response);
             return;
