@@ -95,11 +95,16 @@ public class SetmealController {
      * @return
      */
     @PostMapping("/status/{status}")
-    public Response<String> changeStatus(@PathVariable Integer status, Long id){
+    public Response<String> changeStatus(@PathVariable Integer status, @RequestParam List<Long> id){
         //根据id查询套餐
-        Setmeal setmeal = setmealService.getById(id);
-        setmeal.setStatus(status);
-        setmealService.updateById(setmeal);
+        LambdaQueryWrapper<Setmeal> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.in(Setmeal::getId, id);    //id是List类型
+        List<Setmeal> setmeals = setmealService.list(queryWrapper);
+        setmeals = setmeals.stream().map((item) -> {
+            item.setStatus(status);
+            return item;
+        }).collect(Collectors.toList());
+        setmealService.updateBatchById(setmeals);
         return Response.success("套餐状态修改成功");
     }
 }

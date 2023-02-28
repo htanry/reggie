@@ -6,13 +6,16 @@ import com.example.reggie.common.Response;
 import com.example.reggie.dto.DishDto;
 import com.example.reggie.entity.Category;
 import com.example.reggie.entity.Dish;
+import com.example.reggie.entity.DishFlavor;
 import com.example.reggie.service.CategoryService;
 import com.example.reggie.service.DishFlavorService;
 import com.example.reggie.service.DishService;
+import com.example.reggie.service.SetmealService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -112,26 +115,29 @@ public class DishController {
      * @return  前端要根据服务器的response做出相应处理,主要使用.code
      */
     @PostMapping("status/{status}")
-    public Response<String> changeStatus(@PathVariable Integer status, Long id){
+    public Response<String> changeStatus(@PathVariable Integer status, @RequestParam List<Long> id){
         //先从dish表获取对应id的菜品
         LambdaQueryWrapper<Dish> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.eq(Dish::getId, id);
-        Dish dish = dishService.getOne(queryWrapper);
+        queryWrapper.in(Dish::getId, id);   //id是List类型
+        List<Dish> dishes = dishService.list(queryWrapper);
         //更新菜品的status
-        dish.setStatus(status);
+        dishes = dishes.stream().map((item) -> {
+            item.setStatus(status);
+            return item;
+        }).collect(Collectors.toList());
         //更新数据库
-        dishService.updateById(dish);
+        dishService.updateBatchById(dishes);
         return Response.success("更新菜品状态成功");
     }
 
     /**
-     * 根据id删除菜品
+     * 根据id删除菜品，同时要删除菜品的口味数据(和包括了要删除菜品的套餐数据，但没有实现菜品与套餐的关联关系表)
      * @param id    前端以URL拼接的方式传输，可能会批量删除
      * @return  前端要根据服务器的response做出相应处理,主要使用.code
      */
     @DeleteMapping
-    public Response<String> delete(List<Long> id){
-        dishService.removeByIds(id);
+    public Response<String> delete(@RequestParam List<Long> id){
+        dishService.deleteWithFlavors(id);
         return Response.success("菜品删除成功");
     }
 
