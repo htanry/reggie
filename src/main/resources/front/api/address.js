@@ -44,7 +44,7 @@ function deleteAddressApi(params) {
 //查询单个地址
 function addressFindOneApi(id) {
   return $axios({
-    'url': '/addressBook/${id}',
+    'url': `/addressBook/${id}`,
     'method': 'get',
   })
 }

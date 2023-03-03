@@ -107,4 +107,19 @@ public class SetmealController {
         setmealService.updateBatchById(setmeals);
         return Response.success("套餐状态修改成功");
     }
+
+    /**
+     * 移动端根据条件查询套餐信息
+     * @param setmeal
+     * @return
+     */
+    @GetMapping("list")
+    public Response<List<Setmeal>> list(Setmeal setmeal){
+        LambdaQueryWrapper<Setmeal> setmealLambdaQueryWrapper = new LambdaQueryWrapper<>();
+        setmealLambdaQueryWrapper.eq(setmeal.getCategoryId() != null, Setmeal::getCategoryId, setmeal.getCategoryId());
+        setmealLambdaQueryWrapper.eq(setmeal.getStatus() != null, Setmeal::getStatus, 1);
+        setmealLambdaQueryWrapper.orderByDesc(Setmeal::getUpdateTime);
+        List<Setmeal> setmealList = setmealService.list(setmealLambdaQueryWrapper);
+        return Response.success(setmealList);
+    }
 }

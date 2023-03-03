@@ -57,11 +57,12 @@ public class AddressBookController {
      * @return
      */
     @GetMapping("/{id}")
-    public Response<AddressBook> getById(@PathVariable Long id){
-        LambdaQueryWrapper<AddressBook> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.eq(AddressBook::getId, id);
-        AddressBook addressBook = addressBookService.getOne(queryWrapper);
+    public Response<AddressBook> getById(@PathVariable("id") Long id){
+//        LambdaQueryWrapper<AddressBook> queryWrapper = new LambdaQueryWrapper<>();
+//        queryWrapper.eq(AddressBook::getId, id);
+//        AddressBook addressBook = addressBookService.getOne(queryWrapper);
 //        log.info(addressBook.toString());
+        AddressBook addressBook = addressBookService.getById(id);
         if (addressBook != null)
             return Response.success(addressBook);
         return Response.error("没有找到对应地址信息");

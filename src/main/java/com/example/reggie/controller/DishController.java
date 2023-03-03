@@ -146,12 +146,37 @@ public class DishController {
      * @param dish  前端会传输categoryId过来，可以用Long型数据接收，但是使用Dish接收更加通用，即前端传输其他信息也可以被接收到
      * @return  用于前端展示菜品信息
      */
+//    @GetMapping("list")
+//    public Response<List<Dish>> list(Dish dish){
+//        LambdaQueryWrapper<Dish> queryWrapper = new LambdaQueryWrapper<>();
+//        queryWrapper.eq(dish.getCategoryId() != null, Dish::getCategoryId, dish.getCategoryId());
+//        queryWrapper.eq(Dish::getStatus, 1);
+//        List<Dish> dishList = dishService.list(queryWrapper);
+//        return Response.success(dishList);
+//    }
+
+    /**
+     * 在套餐管理和移动端购物车中根据条件查询菜品信息。基于上面的方法做出改进：移动端需要同时展示口味信息，所以返回对象改为DishDto
+     * @param dish
+     * @return
+     */
     @GetMapping("list")
-    public Response<List<Dish>> list(Dish dish){
+    public Response<List<DishDto>> list(Dish dish){
         LambdaQueryWrapper<Dish> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(dish.getCategoryId() != null, Dish::getCategoryId, dish.getCategoryId());
         queryWrapper.eq(Dish::getStatus, 1);
         List<Dish> dishList = dishService.list(queryWrapper);
-        return Response.success(dishList);
+        List<DishDto> dishDtoList = dishList.stream().map((item) -> {
+            DishDto dishDto = new DishDto();
+            BeanUtils.copyProperties(item, dishDto);
+            Category category = categoryService.getById(item.getCategoryId());  //通过Dish对象查找对应分类
+            dishDto.setCategoryName(category.getName());    //设置分类名
+            LambdaQueryWrapper<DishFlavor> dishFlavorLambdaQueryWrapper = new LambdaQueryWrapper<>();
+            dishFlavorLambdaQueryWrapper.eq(DishFlavor::getDishId, item.getId());   //根据Dish对象查找口味数据
+            List<DishFlavor> dishFlavors = dishFlavorService.list(dishFlavorLambdaQueryWrapper);
+            dishDto.setFlavors(dishFlavors);    //设置口味
+            return dishDto;
+        }).collect(Collectors.toList());
+        return Response.success(dishDtoList);
     }
 }
